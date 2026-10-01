@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qrify.data.QrShareManager
 import com.example.qrify.data.QrStorageManager
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
@@ -65,6 +66,22 @@ class HomeViewModel : ViewModel() {
                     isSaving = false,
                     userMessage = if (success) "QR Code saved to gallery!" else "Failed to save QR Code",
                 )
+            }
+        }
+    }
+
+    fun shareQrCode(context: Context) {
+        val bitmap = _uiState.value.qrBitmap ?: return
+
+        viewModelScope.launch {
+            val success = withContext(Dispatchers.IO) {
+                val shareManager = QrShareManager(context.applicationContext)
+                shareManager.shareQrCode(bitmap)
+            }
+            if (!success) {
+                _uiState.update {
+                    it.copy(userMessage = "Unable to share QR code")
+                }
             }
         }
     }
