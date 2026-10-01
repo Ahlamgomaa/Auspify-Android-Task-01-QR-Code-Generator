@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -199,17 +200,29 @@ fun HomeScreen(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            OutlinedButton(
-                                onClick = { viewModel.saveQrCode(context) },
-                                enabled = !uiState.isSaving,
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                if (uiState.isSaving) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
-                                        strokeWidth = 2.dp,
-                                    )
-                                } else {
-                                    Text("Save QR")
+                                OutlinedButton(
+                                    onClick = { viewModel.saveQrCode(context) },
+                                    enabled = !uiState.isSaving,
+                                ) {
+                                    if (uiState.isSaving) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(18.dp),
+                                            strokeWidth = 2.dp,
+                                        )
+                                    } else {
+                                        Text("Save QR")
+                                    }
+                                }
+
+                                Button(
+                                    onClick = { viewModel.shareQrCode(context) },
+                                    enabled = !uiState.isSaving,
+                                ) {
+                                    Text("Share QR")
                                 }
                             }
                         }
