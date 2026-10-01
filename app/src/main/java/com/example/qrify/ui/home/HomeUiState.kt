@@ -6,5 +6,7 @@ data class HomeUiState(
     val inputText: String = "",
     val qrBitmap: Bitmap? = null,
     val isGenerating: Boolean = false,
+    val isSaving: Boolean = false,
     val errorMessage: String? = null,
+    val userMessage: String? = null,
 )

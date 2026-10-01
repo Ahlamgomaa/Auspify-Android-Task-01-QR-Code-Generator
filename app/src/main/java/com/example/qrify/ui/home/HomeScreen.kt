@@ -22,19 +22,25 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,9 +57,20 @@ fun HomeScreen(
     onToggleTheme: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    LaunchedEffect(uiState.userMessage) {
+        val message = uiState.userMessage
+        if (message != null) {
+            snackbarHostState.showSnackbar(message)
+            viewModel.onUserMessageShown()
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -67,7 +84,7 @@ fun HomeScreen(
                     IconButton(onClick = onToggleTheme) {
                         Icon(
                             painter = painterResource(
-                                id = if (isDarkTheme) R.drawable.ic_light_mode else R.drawable.ic_dark_mode
+                                id = if (isDarkTheme) R.drawable.ic_light_mode else R.drawable.ic_dark_mode,
                             ),
                             contentDescription = if (isDarkTheme) "Switch to Light Theme" else "Switch to Dark Theme",
                         )
@@ -148,9 +165,7 @@ fun HomeScreen(
             )
 
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -158,27 +173,49 @@ fun HomeScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
+                        .fillMaxWidth()
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     val bitmap = uiState.qrBitmap
                     if (bitmap != null) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color.White,
-                            modifier = Modifier.padding(8.dp),
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
                         ) {
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = "Generated QR Code",
-                                modifier = Modifier
-                                    .size(200.dp)
-                                    .padding(8.dp),
-                            )
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color.White,
+                                modifier = Modifier.padding(4.dp),
+                            ) {
+                                Image(
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = "Generated QR Code",
+                                    modifier = Modifier
+                                        .size(200.dp)
+                                        .padding(8.dp),
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            OutlinedButton(
+                                onClick = { viewModel.saveQrCode(context) },
+                                enabled = !uiState.isSaving,
+                            ) {
+                                if (uiState.isSaving) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        strokeWidth = 2.dp,
+                                    )
+                                } else {
+                                    Text("Save QR")
+                                }
+                            }
                         }
                     } else {
                         Column(
+                            modifier = Modifier.height(200.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {
