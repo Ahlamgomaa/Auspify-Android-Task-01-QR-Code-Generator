@@ -51,4 +51,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     //Splash
     implementation(libs.androidx.core.splashscreen)
+    //ViewModel & ZXing
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.zxing.core)
 }
