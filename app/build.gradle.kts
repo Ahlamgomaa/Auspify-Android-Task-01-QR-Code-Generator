@@ -5,11 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.qrify"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.qrify"
@@ -53,4 +49,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    //Splash
+    implementation(libs.androidx.core.splashscreen)
+    //ViewModel & ZXing
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.zxing.core)
 }
