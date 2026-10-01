@@ -1,9 +1,11 @@
 package com.example.qrify.ui.home
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qrify.data.QrStorageManager
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -46,6 +48,29 @@ class HomeViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    fun saveQrCode(context: Context) {
+        val bitmap = _uiState.value.qrBitmap ?: return
+        if (_uiState.value.isSaving) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSaving = true) }
+            val success = withContext(Dispatchers.IO) {
+                val storageManager = QrStorageManager(context.applicationContext)
+                storageManager.saveBitmapToGallery(bitmap)
+            }
+            _uiState.update {
+                it.copy(
+                    isSaving = false,
+                    userMessage = if (success) "QR Code saved to gallery!" else "Failed to save QR Code",
+                )
+            }
+        }
+    }
+
+    fun onUserMessageShown() {
+        _uiState.update { it.copy(userMessage = null) }
     }
 
     private fun createQrBitmap(content: String, size: Int = 512): Bitmap? {
